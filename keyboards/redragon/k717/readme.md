@@ -1,16 +1,16 @@
 # k717
 
-* Keyboard Maintainer: [yangzheng20003 ](https://github.com/yangzheng20003 )
+* Keyboard Maintainer: [vi2co](https://github.com/vi2co)
 * Hardware Supported: k717
-* Hardware Availability: [ET](https://www.redragonzone.com/)
+* Official page: [Redragon Alcor K717 Pro](https://redragonshop.com/products/alcor-k717-pro)
 
 Make example for this keyboard (after setting up your build environment):
 
-    make et/k717:default
+    make redragon/k717:default
         
 Flashing example for this keyboard:
 
-    make et/k717:default:flash
+    make redragon/k717:default:flash
 
 To reset the board into bootloader mode, do one of the following:
 

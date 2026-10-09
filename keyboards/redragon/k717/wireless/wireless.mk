@@ -1,5 +1,5 @@
 WIRELESS_ENABLE ?= yes
-WIRELESS_DIR = $(TOP_DIR)/keyboards/et/wireless
+WIRELESS_DIR = $(TOP_DIR)/keyboards/redragon/k717/wireless
 
 ifeq ($(strip $(WIRELESS_ENABLE)), yes)
     OPT_DEFS += -DWIRELESS_ENABLE -DNO_USB_STARTUP_CHECK

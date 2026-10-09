@@ -205,7 +205,7 @@ void keyboard_post_init_kb(void) {
     debug_enable = true;
 #endif
     keymap_config.no_gui = 0;
-    setPinInputHigh(C5);
+    gpio_set_pin_input_high(C5);
     eeconfig_confinfo_init();
 
 #ifdef LED_POWER_EN_PIN
@@ -215,11 +215,11 @@ void keyboard_post_init_kb(void) {
 #endif
 
 #ifdef MM_BT_DEF_PIN
-    setPinInputHigh(MM_BT_DEF_PIN);
+    gpio_set_pin_input_high(MM_BT_DEF_PIN);
 #endif
 
 #ifdef MM_2G4_DEF_PIN
-    setPinInputHigh(MM_2G4_DEF_PIN);
+    gpio_set_pin_input_high(MM_2G4_DEF_PIN);
 #endif
 
 #ifdef USB_POWER_EN_PIN
@@ -228,11 +228,11 @@ void keyboard_post_init_kb(void) {
 #endif
 
 #ifdef HS_BAT_CABLE_PIN
-    setPinInput(HS_BAT_CABLE_PIN);
+    gpio_set_pin_input(HS_BAT_CABLE_PIN);
 #endif
 
 #ifdef BAT_FULL_PIN
-    setPinInputHigh(BAT_FULL_PIN);
+    gpio_set_pin_input_high(BAT_FULL_PIN);
 #endif
 
 #ifdef WIRELESS_ENABLE
@@ -439,7 +439,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
            
             break;
         }
-        case RGB_MOD:
+        case RM_NEXT:
             break;
         default: {
             
@@ -547,7 +547,7 @@ bool process_record_kb(uint16_t keycode, keyrecord_t *record) {
             {
                 layer_move(0);
                 if (keymap_config.no_gui) {
-                    if (readPin(C5) == 0) tap_code16(KC_APP);
+                    if (gpio_read_pin(C5) == 0) tap_code16(KC_APP);
                     return false;
                 }
                 tap_code16(KC_APP);
@@ -586,7 +586,7 @@ bool process_record_kb(uint16_t keycode, keyrecord_t *record) {
             return false;
         } break;
        
-        case RGB_HUI: {
+        case RM_HUEU: {
             if (record->event.pressed) {
                 uint8_t now_mode = rgb_matrix_get_mode();
 
@@ -606,7 +606,7 @@ bool process_record_kb(uint16_t keycode, keyrecord_t *record) {
             }
             return false;
         } break;
-        case RGB_SPD:
+        case RM_SPDD:
         if (record->event.pressed) {
             if (rgb_matrix_get_speed() <= RGB_MATRIX_SPD_STEP * 2) {
                 rgb_matrix_set_speed(RGB_MATRIX_SPD_STEP);
@@ -617,7 +617,7 @@ bool process_record_kb(uint16_t keycode, keyrecord_t *record) {
         return true;
         break;
         case KC_RCTL:
-        if (readPin(C5) == 0){
+        if (gpio_read_pin(C5) == 0){
             if (record->event.pressed ) {
                 register_code(KC_RALT);
             }
@@ -629,7 +629,7 @@ bool process_record_kb(uint16_t keycode, keyrecord_t *record) {
         return true;
         break;
     case KC_LALT:
-        if (readPin(C5) == 0){
+        if (gpio_read_pin(C5) == 0){
             if (record->event.pressed ) {
                 register_code(KC_LGUI);
             }
@@ -641,7 +641,7 @@ bool process_record_kb(uint16_t keycode, keyrecord_t *record) {
         return true;
         break;
      case KC_RALT:
-        if (readPin(C5) == 0){
+        if (gpio_read_pin(C5) == 0){
             if (record->event.pressed ) {
                 register_code(KC_RGUI);
             }
@@ -653,7 +653,7 @@ bool process_record_kb(uint16_t keycode, keyrecord_t *record) {
         return true;
         break;
     case KC_LGUI:
-        if (readPin(C5) == 0){
+        if (gpio_read_pin(C5) == 0){
             if (record->event.pressed ) {
                 register_code(KC_LALT);
             }
@@ -665,7 +665,7 @@ bool process_record_kb(uint16_t keycode, keyrecord_t *record) {
         return true;
         break;
     case KC_RGUI:
-        if (readPin(C5) == 0){
+        if (gpio_read_pin(C5) == 0){
             if (record->event.pressed ) {
                 register_code(KC_RALT);
             }
@@ -687,9 +687,9 @@ void housekeeping_task_user(void) {
     uint8_t hs_now_mode;
     static uint32_t hs_current_time;
 
-    charging_state = readPin(HS_BAT_CABLE_PIN);
+    charging_state = gpio_read_pin(HS_BAT_CABLE_PIN);
 
-    bat_full_flag = readPin(BAT_FULL_PIN);
+    bat_full_flag = gpio_read_pin(BAT_FULL_PIN);
 
     if (charging_state && (bat_full_flag)) {
         hs_now_mode = MD_SND_CMD_DEVCTRL_CHARGING_DONE;
@@ -1002,12 +1002,12 @@ bool rgb_matrix_indicators_advanced_kb(uint8_t led_min, uint8_t led_max) {
     }
 
     if (host_keyboard_led_state().caps_lock){
-        setPinOutput(HS_LED_CAPS_PIN);
-        writePin(HS_LED_CAPS_PIN, 1);
+        gpio_set_pin_output(HS_LED_CAPS_PIN);
+        gpio_write_pin(HS_LED_CAPS_PIN, 1);
     }
     else{
-        setPinOutput(HS_LED_CAPS_PIN);
-        writePin(HS_LED_CAPS_PIN, 0);
+        gpio_set_pin_output(HS_LED_CAPS_PIN);
+        gpio_write_pin(HS_LED_CAPS_PIN, 0);
     }
         
   
@@ -1043,11 +1043,11 @@ void hs_reset_settings(void) {
     eeconfig_update_rgb_matrix_default();
 
 
-    keymap_config.raw = eeconfig_read_keymap();
+    eeconfig_read_keymap(&keymap_config);
 
 #if defined(NKRO_ENABLE) && defined(FORCE_NKRO)
     keymap_config.nkro = 0;
-    eeconfig_update_keymap(keymap_config.raw);
+    eeconfig_update_keymap(&keymap_config);
 #endif
 
     // #if defined(WIRELESS_ENABLE)
