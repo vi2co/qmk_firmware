@@ -161,7 +161,7 @@ void palcallback_cb(uint8_t line) {
 void lpwr_stop_hook_pre(void) {
     
     gpio_write_pin_low(LED_POWER_EN_PIN);
-    gpio_write_pin_low(AW20216S_EN_PIN_1);
+    gpio_write_pin_low(AW20216S_EN_PIN);
     gpio_write_pin_low(HS_LED_CAPS_PIN);
 
     if (lower_sleep) {

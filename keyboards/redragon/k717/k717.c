@@ -64,7 +64,7 @@ const aw20216s_led_t PROGMEM g_aw20216s_leds[AW20216S_LED_COUNT] = {
     {0, SW6_CS4,  SW6_CS5,  SW6_CS6  },  // 47 \|
     {0, SW7_CS4,  SW7_CS5,  SW7_CS6  },  // 48 Del
     {0, SW8_CS4,  SW8_CS5,  SW8_CS6  },  // 49 End
-    {0, SW9_CS4,  SW9_CS5,  SW9_CS16  },  // 50 PGDN
+    {0, SW9_CS4,  SW9_CS5,  SW9_CS6   },  // 50 PGDN
     {0, SW10_CS4, SW10_CS5, SW10_CS6  },  // 51 Caps
     {0, SW11_CS4, SW11_CS5, SW11_CS6  },  // 52 A
     {0, SW12_CS4, SW12_CS5, SW12_CS6  },  // 53 S
@@ -77,7 +77,8 @@ const aw20216s_led_t PROGMEM g_aw20216s_leds[AW20216S_LED_COUNT] = {
     {0, SW11_CS7,  SW11_CS8,  SW11_CS9   },  // 60 L
     {0, SW12_CS7,  SW12_CS8,  SW12_CS9   },  // 61 ;:
     {0, SW10_CS18, SW10_CS17, SW10_CS16  },  // 62 '
-    {0, SW11_CS18, SW11_CS17, SW11_CS16  }  // 63 #~
+    {0, SW11_CS18, SW11_CS17, SW11_CS16  },  // 63 #~
+    {0, SW1_CS18,  SW1_CS17,  SW1_CS16   }   // 64 (indicator LED, matches official fw)
 };
 
 #ifdef WIRELESS_ENABLE
@@ -245,6 +246,17 @@ void keyboard_post_init_kb(void) {
 
 #ifdef WIRELESS_ENABLE
 
+/* The LED section is powered off while sleeping (A5 low, AW20216S EN low), so the
+ * AW20216S may lose its registers. Power it back up and re-initialise it on wake. */
+static void led_hw_wakeup(void) {
+    gpio_set_pin_output(LED_POWER_EN_PIN);
+    gpio_write_pin_high(LED_POWER_EN_PIN);
+    wait_ms(2);
+    aw20216s_init_drivers();
+    /* Force the next frame to be re-sent: the driver skips unchanged colours. */
+    aw20216s_set_color_all(1, 1, 1);
+}
+
 void usb_power_connect(void) {
 
 #    ifdef USB_POWER_EN_PIN
@@ -270,9 +282,7 @@ void suspend_power_down_kb(void) {
 
 void suspend_wakeup_init_kb(void) {
 
-#    ifdef LED_POWER_EN_PIN
-    gpio_write_pin_high(LED_POWER_EN_PIN);
-#    endif
+    led_hw_wakeup();
 
     wireless_devs_change(wireless_get_current_devs(), wireless_get_current_devs(), false);
     suspend_wakeup_init_user();
@@ -1055,6 +1065,6 @@ void hs_reset_settings(void) {
 void lpwr_wakeup_hook(void) {
     hs_mode_scan(false, confinfo.devs, confinfo.last_btdevs);
 
-    gpio_write_pin_high(LED_POWER_EN_PIN);
+    led_hw_wakeup();
     gpio_write_pin_high(A9);
 }
